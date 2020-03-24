@@ -1,11 +1,15 @@
 let s:test_buffer = 0
-let sRegister#window = 'vertical botright 40new'
 let s:regPos = {}
 let s:typPos = {}
 let s:ptab = 0
 let s:pbuf = 0
 let s:pwin = 0
 let s:buffopen = 0
+
+let s:rLen = 0
+
+let g:SRegisterFull = 0
+let g:SRegisterWindow = 'vertical botright 40new'
 
 function! sRegister#open()
     if s:buffopen == 1
@@ -17,7 +21,7 @@ function! sRegister#open()
 
     let s:buffopen = 1
 
-    execute get(g:, 'sRegisterWindow', g:sRegister#window)
+    execute get(g:, 'sRegisterWindow', g:SRegisterWindow)
     let s:test_buffer = bufnr('')
     setlocal nonumber buftype=nofile bufhidden=wipe nobuflisted noswapfile nowrap
     let s:ptab = tabpagenr()
@@ -68,41 +72,52 @@ function! s:regConvert(type)
 endfunction
 
 function! s:redrow_reglist_buffer()
-    let i = 1
-    call setbufline(s:pbuf, i, "Registers")
-    let i += 1
-    call setbufline(s:pbuf, i, "  special:")
-    let i += 1
+    let s:regPos = {}
+    let s:typPos = {}
+    let s:rLen = 1
+    call setbufline(s:pbuf, s:rLen, "Registers")
+    let s:rLen += 1
+    call setbufline(s:pbuf, s:rLen, "  special:")
+    let s:rLen += 1
     for r in ['"', '*', '+', '-']
-        let s:regPos[i] = r 
-        let s:typPos[i] = s:regConvert(getregtype(r))
-        call setbufline(s:pbuf, i, printf("    %s: %s %s", r, s:typPos[i], getreg(r)))
-        let i += 1
+        if g:SRegisterFull || strlen(getreg(r))
+            let s:regPos[s:rLen] = r 
+            let s:typPos[s:rLen] = s:regConvert(getregtype(r))
+            call setbufline(s:pbuf, s:rLen, printf("    %s: %s %s", r, s:typPos[s:rLen], getreg(r)))
+            let s:rLen += 1
+        endif
     endfor
-    call setbufline(s:pbuf, i, "  readonly:")
-    let i += 1
+    call setbufline(s:pbuf, s:rLen, "  readonly:")
+    let s:rLen += 1
     for r in ['.', ':', '%', '#', '/']
-        let s:regPos[i] = r 
-        let s:typPos[i] = s:regConvert(getregtype(r))
-        call setbufline(s:pbuf, i, printf("    %s: %s %s", r, s:typPos[i], getreg(r)))
-        let i += 1
+        if g:SRegisterFull || strlen(getreg(r))
+            let s:regPos[s:rLen] = r 
+            let s:typPos[s:rLen] = s:regConvert(getregtype(r))
+            call setbufline(s:pbuf, s:rLen, printf("    %s: %s %s", r, s:typPos[s:rLen], getreg(r)))
+            let s:rLen += 1
+        endif
     endfor
-    call setbufline(s:pbuf, i, "  numered:")
-    let i += 1
+    call setbufline(s:pbuf, s:rLen, "  numered:")
+    let s:rLen += 1
     for r in map(range(0, 9), 'string(v:val)')
-        let s:regPos[i] = r 
-        let s:typPos[i] = s:regConvert(getregtype(r))
-        call setbufline(s:pbuf, i, printf("    %s: %s %s", r, s:typPos[i], getreg(r)))
-        let i += 1
+        if g:SRegisterFull || strlen(getreg(r))
+            let s:regPos[s:rLen] = r 
+            let s:typPos[s:rLen] = s:regConvert(getregtype(r))
+            call setbufline(s:pbuf, s:rLen, printf("    %s: %s %s", r, s:typPos[s:rLen], getreg(r)))
+            let s:rLen += 1
+        endif
     endfor
-    call setbufline(s:pbuf, i, "  named:")
-    let i += 1
+    call setbufline(s:pbuf, s:rLen, "  named:")
+    let s:rLen += 1
     for r in map(range(97, 97 + 25), 'nr2char(v:val)')
-        let s:regPos[i] = r 
-        let s:typPos[i] = s:regConvert(getregtype(r))
-        call setbufline(s:pbuf, i, printf("    %s: %s %s", r, s:typPos[i], getreg(r)))
-        let i += 1
+        if g:SRegisterFull || strlen(getreg(r))
+            let s:regPos[s:rLen] = r 
+            let s:typPos[s:rLen] = s:regConvert(getregtype(r))
+            call setbufline(s:pbuf, s:rLen, printf("    %s: %s %s", r, s:typPos[s:rLen], getreg(r)))
+            let s:rLen += 1
+        endif
     endfor
+    let s:rLen -= 1
 endfunction
 
 function sRegister#Update()
@@ -117,8 +132,8 @@ function s:testChange()
     if bufnr('') != s:pbuf
         return
     endif
-    for pos in range(14, 50)
-        if pos != 24
+    for pos in range(1, s:rLen)
+        if has_key(s:regPos, pos) && index(['"', '*', '+', '-','.', ':', '%', '#', '/'], s:regPos[pos]) == -1
             let str = getline(pos)
             "let size = strlen(str) - 2
             if getreg(s:regPos[pos]) != str[9:] || s:regConvert(s:typPos[pos]) != str[7]

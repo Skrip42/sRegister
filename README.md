@@ -6,8 +6,14 @@ vim plugin for viewing and editing registers and macros
 This plugin allows you to view and edit your registers and macros.
 
 ## Usage:
-| Command                  | Description         |
-| ------------------------ | ------------------- |
-| :call sRegister#open()   | open register tab   |
-| :call sRegister#close()  | close register tab  |
-| :call sRegister#toggle() | toggle register tab |
+| Command         | Description         |
+| --------------- | ------------------- |
+| SRegisterOpen   | open register tab   |
+| SRegisterClose  | close register tab  |
+| SRegisterToggle | toggle register tab |
+
+##Options:
+| Option            | Default                 | Description                        |
+| ----------------- | ----------------------- | ---------------------------------- |
+| g:SRegisterFull   | 0                       | set 1 to show all registers        |
+| g:SRegisterWindow | vertical botright 40new | SRegister window size and position |
