@@ -12,7 +12,7 @@ This plugin allows you to view and edit your registers and macros.
 | SRegisterClose  | close register tab  |
 | SRegisterToggle | toggle register tab |
 
-##Options:
+## Options:
 | Option            | Default                 | Description                        |
 | ----------------- | ----------------------- | ---------------------------------- |
 | g:SRegisterFull   | 0                       | set 1 to show all registers        |
